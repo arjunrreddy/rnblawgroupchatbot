@@ -1,0 +1,7 @@
+openai
+whisper
+yt-dlp
+fastapi
+uvicorn
+pinecone-client
+pyyaml
