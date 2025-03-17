@@ -3,5 +3,9 @@ whisper
 yt-dlp
 fastapi
 uvicorn
-pinecone-client
-pyyaml
+pinecone
+pyyamlfaiss-cpu
+numpy
+openai
+fastapi
+uvicorn
