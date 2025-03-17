@@ -1,0 +1,11 @@
+# Ignore virtual environment
+venv/
+
+# Ignore video & transcript data (large files)
+data/videos/
+data/transcripts/
+
+# Ignore Python cache & system files
+__pycache__/
+*.pyc
+.DS_Store
