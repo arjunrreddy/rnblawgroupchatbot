@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import openai
-import yaml
-from search import search_transcript, get_most_relevant_timestamp  # Ensure these exist
+import sys
+import os
+from src.search import search_transcript
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -10,7 +11,7 @@ app = FastAPI()
 # Allow frontend to connect to backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change this to specific frontend URL if needed
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,26 +24,26 @@ def home():
 @app.get("/ask")
 def ask_question(query: str):
     """Handles chatbot questions"""
-    
-    # Ensure transcript search function exists
-    search_results = search_transcript(query, top_k=5)
-    
-    if not search_results:
+
+    # Search transcript for relevant snippets
+    top_snippets = search_transcript(query, top_k=5)
+
+    # ✅ If no results found, return a message
+    if not top_snippets:
         return {
             "response": "I couldn't find relevant information in the podcast transcript.",
             "references": "No relevant video sections found."
         }
 
-    # Extract full transcript text for ChatGPT
+    # Combine transcript snippets
     full_transcript_text = "\n".join([
-        f"({result['timestamp']}s) {result['answer']}" for result in search_results
+        f"({result['timestamp']}s) {result['answer']}" for result in top_snippets
     ])
 
-    # Find the most relevant timestamp
-    best_timestamp, best_video_link = get_most_relevant_timestamp(search_results)
-
-    # Format the best video link
-    best_video_link = f"{best_video_link}&t={best_timestamp}s" if best_video_link else "No video available"
+    # Find best snippet to recommend
+    best_snippet = top_snippets[0]  # Use the most relevant snippet
+    best_timestamp = best_snippet["timestamp"]
+    best_video_link = f"{best_snippet['video_link']}&t={best_timestamp}s"
 
     # Generate OpenAI response
     chat_prompt = f"""
@@ -57,7 +58,7 @@ def ask_question(query: str):
     Provide an answer referencing relevant timestamps.
     """
 
-    client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")  # Load API key correctly
+    client = openai.OpenAI(api_key="YOUR_OPENAI_API_KEY")  # Replace with your actual key
 
     try:
         response = client.chat.completions.create(
