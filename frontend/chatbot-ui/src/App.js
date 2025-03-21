@@ -1,70 +1,72 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useRef, useEffect } from "react";
+import "./App.css";
+
+// 🔁 Change this to your ngrok URL or localhost
+//const BACKEND_URL = "https://daa3-70-122-236-70.ngrok-free.app";
+const BACKEND_URL = "http://127.0.0.1:8000"; // ⬅️ Use this line if you're testing locally
 
 function App() {
   const [query, setQuery] = useState("");
-  const [response, setResponse] = useState("");
-  const [videoLink, setVideoLink] = useState("");
+  const [userQuestion, setUserQuestion] = useState("");
+  const [response, setResponse] = useState(null);
+  const [timestamp, setTimestamp] = useState(null);
+  const videoRef = useRef(null);
 
-  const askQuestion = async () => {
-    setResponse("Thinking...");
-    setVideoLink("");
+  const handleAskQuestion = async () => {
+    if (!query.trim()) return;
+
+    setUserQuestion(query);
+    setQuery("");
 
     try {
-      const res = await axios.get(`http://localhost:8000/ask?query=${encodeURIComponent(query)}`);
-      setResponse(res.data.response);
+      const res = await fetch(`${BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
+      const data = await res.json();
 
-      if (res.data.references.includes("https://")) {
-        setVideoLink(res.data.references);
-      }
+      setResponse(data.response || "No response available.");
+      setTimestamp(data.timestamp || null);
     } catch (error) {
+      console.error("Error fetching response:", error);
       setResponse("Error retrieving response. Please try again.");
     }
   };
 
+  useEffect(() => {
+    if (timestamp !== null && videoRef.current) {
+      videoRef.current.currentTime = timestamp;
+    }
+  }, [timestamp]);
+
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
+    <div className="App">
       <h1>Immigration Law Chatbot</h1>
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Ask a question about immigration law..."
-        style={{
-          width: "60%",
-          padding: "10px",
-          fontSize: "16px",
-          borderRadius: "5px",
-          border: "1px solid #ccc",
-        }}
+        placeholder="Ask your immigration question..."
       />
-      <button
-        onClick={askQuestion}
-        style={{
-          marginLeft: "10px",
-          padding: "10px 15px",
-          fontSize: "16px",
-          backgroundColor: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Ask
-      </button>
-      <div id="response" style={{ marginTop: "20px", fontSize: "18px" }}>{response}</div>
-      {videoLink && (
-        <iframe
-          title="Podcast Video"
-          width="560"
-          height="315"
-          src={videoLink}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          style={{ marginTop: "20px" }}
-        />
+      <button onClick={handleAskQuestion}>Ask</button>
+
+      {response && (
+        <div>
+          {userQuestion && <h3><strong>Q: {userQuestion}</strong></h3>}
+
+          <h3>Response:</h3>
+          <p>{response}</p>
+
+          {timestamp !== null && (
+            <div>
+              <h4>Relevant Video Section:</h4>
+              <video controls width="600" ref={videoRef}>
+                <source src={`${BACKEND_URL}/video`} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              <p>
+                <strong>Jump to:</strong> {timestamp} seconds
+              </p>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
