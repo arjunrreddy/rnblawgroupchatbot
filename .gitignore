@@ -1,11 +1,10 @@
-# Ignore virtual environment
-venv/
+# 🐍 Ignore virtual environment
+backend/venv/
 
-# Ignore video & transcript data (large files)
-data/videos/
-data/transcripts/
+# 🎥 Ignore only large video files
+backend/data/videos/
 
-# Ignore Python cache & system files
+# 🧹 Ignore Python cache & system files
 __pycache__/
 *.pyc
 .DS_Store
