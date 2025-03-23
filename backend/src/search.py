@@ -12,9 +12,17 @@ VIDEO_URL = "https://www.facebook.com/rnlawgroupUS/videos/498204740023527/"
 
 # Load API Key
 def load_config():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key:
+        return {"openai_api_key": api_key}
+
+    # Fallback to local config.yaml (for local dev)
     config_path = os.path.join(os.path.dirname(__file__), "../config/config.yaml")
-    with open(config_path, "r") as file:
-        return yaml.safe_load(file)
+    try:
+        with open(config_path, "r") as file:
+            return yaml.safe_load(file)
+    except FileNotFoundError:
+        raise RuntimeError("❌ ERROR: OPENAI_API_KEY not found in environment or config.yaml.")
 
 config = load_config()
 api_key = config.get("openai_api_key", None)
