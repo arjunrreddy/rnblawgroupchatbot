@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 
 // 🔁 Change this to your ngrok URL or localhost
-//const BACKEND_URL = "https://daa3-70-122-236-70.ngrok-free.app";
-const BACKEND_URL = "http://127.0.0.1:8000"; // ⬅️ Use this line if you're testing locally
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
 function App() {
   const [query, setQuery] = useState("");
@@ -58,7 +57,7 @@ function App() {
             <div>
               <h4>Relevant Video Section:</h4>
               <video controls width="600" ref={videoRef}>
-                <source src={`${BACKEND_URL}/video`} type="video/mp4" />
+              <source src="https://www.dropbox.com/scl/fi/yz7xlp3qo3h95p4r0xtjv/march_11.mp4?rlkey=u9frr2ar77ohfhnenvkqleo0j&st=ldp6pqqo&dl=1" type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
               <p>

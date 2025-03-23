@@ -3,6 +3,11 @@ backend/venv/
 
 # 🎥 Ignore only large video files
 backend/data/videos/
+render-static/march_11.mp4
+render-static/index.html
+
+#ignore secrets
+backend/config/config.yaml
 
 # 🧹 Ignore Python cache & system files
 __pycache__/
