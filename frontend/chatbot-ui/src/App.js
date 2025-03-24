@@ -10,22 +10,32 @@ function App() {
   const [response, setResponse] = useState(null);
   const [timestamp, setTimestamp] = useState(null);
   const videoRef = useRef(null);
+  const LOCAL_BACKEND_URL = "http://127.0.0.1:8000";
+  const PROD_BACKEND_URL = "https://rnblawgroupchatbot.onrender.com";
 
   const handleAskQuestion = async () => {
     if (!query.trim()) return;
-
+  
     setUserQuestion(query);
     setQuery("");
-
+  
     try {
-      const res = await fetch(`${BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
+      const res = await fetch(`${LOCAL_BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
       const data = await res.json();
-
       setResponse(data.response || "No response available.");
       setTimestamp(data.timestamp || null);
-    } catch (error) {
-      console.error("Error fetching response:", error);
-      setResponse("Error retrieving response. Please try again.");
+    } catch (err) {
+      console.warn("⚠️ Local backend failed. Trying Render deployment...");
+  
+      try {
+        const res = await fetch(`${PROD_BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
+        const data = await res.json();
+        setResponse(data.response || "No response available.");
+        setTimestamp(data.timestamp || null);
+      } catch (error) {
+        console.error("❌ Both local and remote backends failed:", error);
+        setResponse("Error retrieving response. Please try again later.");
+      }
     }
   };
 
