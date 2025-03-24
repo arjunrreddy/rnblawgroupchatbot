@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import "./App.css";
 
 // 🔁 Change this to your ngrok URL or localhost
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "https://rnblawgroupchatbot.onrender.com";
 
 function App() {
   const [query, setQuery] = useState("");
@@ -20,7 +20,7 @@ function App() {
     setQuery("");
   
     try {
-      const res = await fetch(`${LOCAL_BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
+      const res = await fetch(`${BACKEND_URL}/ask?query=${encodeURIComponent(query)}`);
       const data = await res.json();
       setResponse(data.response || "No response available.");
       setTimestamp(data.timestamp || null);
